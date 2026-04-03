@@ -1,0 +1,2018 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MOROZ — A Cidade Que Apodreceu Por Dentro</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@300;400;600;700&family=Share+Tech+Mono&family=Rajdhani:wght@300;400;500;600;700&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:          #060508;
+    --bg2:         #0b0a0f;
+    --panel:       #100f14;
+    --panel2:      #161420;
+    --text:        #c4b8d0;
+    --text-dim:    #5a5268;
+    --red:         #8b0000;
+    --red-bright:  #c0102a;
+    --red-glow:    rgba(192,16,42,0.35);
+    --violet:      #3a1f5e;
+    --violet-bright: #7b3fbc;
+    --violet-glow: rgba(123,63,188,0.3);
+    --acid:        #b8ff00;
+    --acid-dim:    #7aaa00;
+    --cream:       #e8dff0;
+    --border:      #1e1b28;
+    --border-bright: #2e2a3e;
+    --stamp:       rgba(192,16,42,0.9);
+    --scan:        rgba(180,0,255,0.03);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 16px;
+    line-height: 1.7;
+    overflow-x: hidden;
+  }
+
+  /* SCANLINE + GRAIN */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      repeating-linear-gradient(0deg, transparent, transparent 3px, var(--scan) 3px, var(--scan) 4px),
+      url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+    opacity: 0.05;
+    pointer-events: none;
+    z-index: 9999;
+  }
+
+  /* GLITCH KEYFRAMES */
+  @keyframes glitch {
+    0%,90%,100% { transform: translateX(0); clip-path: none; }
+    91% { transform: translateX(-4px); clip-path: inset(20% 0 60% 0); }
+    93% { transform: translateX(4px); clip-path: inset(60% 0 10% 0); }
+    95% { transform: translateX(0); }
+  }
+
+  @keyframes flicker {
+    0%,96%,100% { opacity: 1; }
+    97% { opacity: 0.4; }
+    98% { opacity: 1; }
+    99% { opacity: 0.6; }
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+  @keyframes scanline {
+    0%   { top: -40px; }
+    100% { top: 110%; }
+  }
+
+  @keyframes pulse {
+    0%,100% { box-shadow: 0 0 8px var(--red-glow); }
+    50%      { box-shadow: 0 0 22px var(--red-glow), 0 0 4px var(--red-bright) inset; }
+  }
+
+  /* ==================== COVER ==================== */
+  .cover {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 60px 20px;
+    position: relative;
+    background:
+      radial-gradient(ellipse 80% 60% at 50% 40%, #1a0a2e 0%, #060508 65%),
+      radial-gradient(ellipse 40% 30% at 30% 70%, #200008 0%, transparent 60%);
+    overflow: hidden;
+  }
+
+  .cover-scan {
+    position: absolute;
+    left: 0; right: 0;
+    height: 40px;
+    background: linear-gradient(to bottom, transparent, rgba(123,63,188,0.08), transparent);
+    animation: scanline 8s linear infinite;
+    pointer-events: none;
+  }
+
+  .cover-grid {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(58,31,94,0.12) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(58,31,94,0.12) 1px, transparent 1px);
+    background-size: 60px 60px;
+    pointer-events: none;
+  }
+
+  .cover-corner {
+    position: absolute;
+    width: 80px; height: 80px;
+    border-color: var(--red-bright);
+    border-style: solid;
+    opacity: 0.5;
+  }
+  .cover-corner.tl { top: 24px; left: 24px; border-width: 2px 0 0 2px; }
+  .cover-corner.tr { top: 24px; right: 24px; border-width: 2px 2px 0 0; }
+  .cover-corner.bl { bottom: 24px; left: 24px; border-width: 0 0 2px 2px; }
+  .cover-corner.br { bottom: 24px; right: 24px; border-width: 0 2px 2px 0; }
+
+  .cover-eyebrow {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 7px;
+    color: var(--red-bright);
+    text-transform: uppercase;
+    margin-bottom: 48px;
+    opacity: 0;
+    animation: fadeUp 0.8s ease 0.4s forwards;
+    position: relative;
+    z-index: 1;
+  }
+
+  .cover-title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: clamp(72px, 18vw, 200px);
+    font-weight: 900;
+    letter-spacing: 18px;
+    color: var(--cream);
+    line-height: 0.9;
+    text-shadow:
+      0 0 40px rgba(123,63,188,0.4),
+      0 0 2px var(--violet-bright),
+      4px 4px 0 var(--red);
+    opacity: 0;
+    animation: fadeUp 1s ease 0.6s forwards, glitch 12s ease-in-out 3s infinite;
+    position: relative;
+    z-index: 1;
+  }
+
+  .cover-subtitle-line {
+    font-family: 'Oswald', sans-serif;
+    font-size: clamp(14px, 2.5vw, 22px);
+    font-weight: 300;
+    color: var(--violet-bright);
+    letter-spacing: 6px;
+    text-transform: uppercase;
+    margin-top: 18px;
+    opacity: 0;
+    animation: fadeUp 1s ease 0.9s forwards;
+    position: relative;
+    z-index: 1;
+  }
+
+  .cover-tagline-big {
+    font-family: 'Orbitron', sans-serif;
+    font-size: clamp(28px, 6vw, 64px);
+    font-weight: 700;
+    color: var(--red-bright);
+    letter-spacing: 4px;
+    line-height: 1;
+    text-shadow: 0 0 30px var(--red-glow);
+    margin-top: 10px;
+    opacity: 0;
+    animation: fadeUp 1s ease 1.1s forwards, flicker 8s ease 4s infinite;
+    position: relative;
+    z-index: 1;
+  }
+
+  .cover-divider {
+    width: 240px; height: 1px;
+    background: linear-gradient(to right, transparent, var(--violet-bright), var(--red-bright), transparent);
+    margin: 32px auto;
+    opacity: 0;
+    animation: fadeIn 1s ease 1.3s forwards;
+    position: relative;
+    z-index: 1;
+  }
+
+  .cover-tagline {
+    font-size: 14px;
+    color: var(--text-dim);
+    letter-spacing: 3px;
+    font-style: italic;
+    max-width: 480px;
+    opacity: 0;
+    animation: fadeUp 1s ease 1.5s forwards;
+    position: relative;
+    z-index: 1;
+    font-family: 'Share Tech Mono', monospace;
+  }
+
+  .stamp {
+    display: inline-block;
+    border: 3px solid var(--stamp);
+    color: var(--stamp);
+    font-family: 'Orbitron', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: 6px;
+    padding: 8px 24px;
+    margin-top: 48px;
+    transform: rotate(-4deg);
+    opacity: 0;
+    animation: fadeIn 0.6s ease 1.8s forwards;
+    text-shadow: 0 0 12px var(--red-glow);
+    box-shadow: 0 0 18px var(--red-glow);
+    position: relative;
+    z-index: 1;
+  }
+
+  .enter-btn {
+    margin-top: 56px;
+    background: none;
+    border: 1px solid var(--violet-bright);
+    color: var(--violet-bright);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 13px;
+    letter-spacing: 5px;
+    padding: 16px 50px;
+    cursor: pointer;
+    text-transform: uppercase;
+    transition: all 0.3s ease;
+    opacity: 0;
+    animation: fadeIn 0.8s ease 2.1s forwards;
+    position: relative;
+    z-index: 1;
+    box-shadow: 0 0 14px var(--violet-glow);
+  }
+
+  .enter-btn:hover {
+    background: var(--violet-bright);
+    color: var(--bg);
+    box-shadow: 0 0 30px var(--violet-glow);
+  }
+
+  /* ==================== MAIN ==================== */
+  .main { display: none; }
+  .main.visible { display: block; }
+
+  /* NAV */
+  .nav {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(6,5,8,0.96);
+    border-bottom: 1px solid var(--border-bright);
+    display: flex;
+    overflow-x: auto;
+    scrollbar-width: none;
+    backdrop-filter: blur(6px);
+  }
+
+  .nav::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(to right, var(--red-bright), var(--violet-bright), var(--red-bright));
+    opacity: 0.5;
+  }
+
+  .nav::-webkit-scrollbar { display: none; }
+
+  .nav-btn {
+    background: none;
+    border: none;
+    border-right: 1px solid var(--border);
+    color: var(--text-dim);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 2px;
+    padding: 16px 22px;
+    cursor: pointer;
+    text-transform: uppercase;
+    white-space: nowrap;
+    transition: all 0.2s ease;
+    position: relative;
+  }
+
+  .nav-btn::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(to right, var(--red-bright), var(--violet-bright));
+    transform: scaleX(0);
+    transition: transform 0.2s ease;
+  }
+
+  .nav-btn:hover { color: var(--cream); }
+  .nav-btn.active { color: var(--violet-bright); }
+  .nav-btn.active::after { transform: scaleX(1); }
+
+  /* SECTIONS */
+  .section { display: none; padding: 64px 44px; max-width: 1120px; margin: 0 auto; }
+  .section.active { display: block; animation: fadeIn 0.4s ease; }
+
+  /* SECTION HEADER */
+  .section-header {
+    display: flex;
+    align-items: baseline;
+    gap: 22px;
+    margin-bottom: 52px;
+    padding-bottom: 22px;
+    border-bottom: 1px solid var(--border-bright);
+    position: relative;
+  }
+
+  .section-header::after {
+    content: '';
+    position: absolute;
+    bottom: -1px; left: 0;
+    width: 120px; height: 2px;
+    background: linear-gradient(to right, var(--red-bright), var(--violet-bright));
+  }
+
+  .section-number {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 70px;
+    color: var(--border-bright);
+    line-height: 1;
+    flex-shrink: 0;
+    font-weight: 900;
+  }
+
+  .section-title {
+    font-family: 'Oswald', sans-serif;
+    font-size: 46px;
+    font-weight: 700;
+    color: var(--cream);
+    letter-spacing: 4px;
+    line-height: 1;
+    text-shadow: 0 0 20px rgba(123,63,188,0.2);
+  }
+
+  .section-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    color: var(--red-bright);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-top: 6px;
+  }
+
+  /* BODY TEXT */
+  h2 {
+    font-family: 'Oswald', sans-serif;
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--violet-bright);
+    margin: 42px 0 16px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  h3 {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 12px;
+    color: var(--cream);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin: 32px 0 12px;
+    padding-left: 16px;
+    border-left: 3px solid var(--red-bright);
+  }
+
+  p { margin-bottom: 16px; color: var(--text); }
+
+  .lead {
+    font-size: 18px;
+    color: var(--cream);
+    font-style: italic;
+    line-height: 1.85;
+    margin-bottom: 32px;
+    padding: 22px 32px;
+    border-left: 3px solid var(--violet-bright);
+    background: rgba(123,63,188,0.05);
+    box-shadow: inset 0 0 30px rgba(123,63,188,0.03);
+  }
+
+  /* REDACTED */
+  .redacted {
+    background: var(--red);
+    color: var(--red);
+    padding: 0 4px;
+    border-radius: 2px;
+    user-select: none;
+  }
+
+  /* TIMELINE */
+  .timeline { position: relative; padding-left: 44px; }
+
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 8px; bottom: 8px;
+    width: 1px;
+    background: linear-gradient(to bottom, transparent, var(--violet-bright), var(--red-bright), transparent);
+  }
+
+  .timeline-item {
+    position: relative;
+    margin-bottom: 38px;
+  }
+
+  .timeline-item::before {
+    content: '';
+    position: absolute;
+    left: -48px; top: 8px;
+    width: 9px; height: 9px;
+    background: var(--violet-bright);
+    border-radius: 50%;
+    box-shadow: 0 0 10px var(--violet-glow);
+  }
+
+  .timeline-year {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--violet-bright);
+    letter-spacing: 2px;
+    margin-bottom: 4px;
+  }
+
+  .timeline-text { font-size: 14px; color: var(--text); }
+  .timeline-text strong { color: var(--cream); font-weight: 600; }
+
+  .timeline-item.red::before { background: var(--red-bright); box-shadow: 0 0 10px var(--red-glow); }
+  .timeline-item.red .timeline-year { color: var(--red-bright); }
+
+  /* NPC CARDS */
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+    gap: 22px;
+    margin: 30px 0;
+  }
+
+  .npc-card {
+    background: var(--panel2);
+    border: 1px solid var(--border-bright);
+    overflow: hidden;
+    transition: border-color 0.25s ease, box-shadow 0.25s ease;
+    position: relative;
+  }
+
+  .npc-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(to right, var(--red-bright), var(--violet-bright));
+    transform: scaleX(0);
+    transition: transform 0.25s ease;
+    transform-origin: left;
+  }
+
+  .npc-card:hover { border-color: var(--violet-bright); box-shadow: 0 0 20px rgba(123,63,188,0.1); }
+  .npc-card:hover::before { transform: scaleX(1); }
+
+  .npc-card-header {
+    background: var(--panel);
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border-bright);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .npc-avatar {
+    width: 50px; height: 50px;
+    background: var(--border-bright);
+    border: 1px solid var(--violet);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text-dim);
+  }
+
+  .npc-name {
+    font-family: 'Oswald', sans-serif;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--cream);
+    letter-spacing: 1px;
+  }
+
+  .npc-role {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    color: var(--red-bright);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-top: 2px;
+  }
+
+  .npc-card-body { padding: 16px 20px; }
+
+  .npc-stat {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 8px;
+    font-size: 13px;
+  }
+
+  .npc-stat-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    color: var(--text-dim);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    min-width: 64px;
+    padding-top: 2px;
+  }
+
+  .npc-stat-value { color: var(--text); font-size: 13px; font-family: 'Rajdhani', sans-serif; }
+
+  .npc-desc {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+    font-size: 13px;
+    font-style: italic;
+    color: var(--text-dim);
+    line-height: 1.65;
+  }
+
+  /* FACTION CARDS */
+  .faction-block {
+    background: var(--panel2);
+    border: 1px solid var(--border-bright);
+    margin-bottom: 30px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .faction-block::after {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    background: linear-gradient(to bottom, var(--red-bright), var(--violet-bright));
+  }
+
+  .faction-header {
+    background: var(--panel);
+    padding: 20px 28px 20px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--border-bright);
+    gap: 20px;
+  }
+
+  .faction-name {
+    font-family: 'Oswald', sans-serif;
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--cream);
+    letter-spacing: 3px;
+  }
+
+  .faction-tag {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    color: var(--violet-bright);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    border: 1px solid var(--violet);
+    padding: 4px 12px;
+    white-space: nowrap;
+  }
+
+  .faction-body { padding: 24px 28px 24px 32px; }
+
+  .faction-meta {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 14px;
+    margin-bottom: 22px;
+    padding: 16px;
+    background: rgba(0,0,0,0.2);
+    border: 1px solid var(--border);
+  }
+
+  .faction-meta-item {}
+
+  .faction-meta-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    color: var(--text-dim);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+
+  .faction-meta-value {
+    font-size: 13px;
+    color: var(--cream);
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 500;
+  }
+
+  /* PYRAMID */
+  .pyramid { margin: 30px 0; }
+
+  .pyramid-level {
+    display: flex;
+    gap: 0;
+    margin-bottom: 4px;
+  }
+
+  .pyramid-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    color: var(--text-dim);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    width: 90px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    padding-right: 16px;
+    text-align: right;
+    justify-content: flex-end;
+  }
+
+  .pyramid-content {
+    flex: 1;
+    padding: 16px 20px;
+    border-left: 3px solid var(--border-bright);
+    transition: border-color 0.2s ease;
+  }
+
+  .pyramid-content:hover { border-left-color: var(--violet-bright); }
+
+  .pyramid-level.lv1 .pyramid-content { background: rgba(192,16,42,0.12); border-left-color: var(--red-bright); }
+  .pyramid-level.lv2 .pyramid-content { background: rgba(123,63,188,0.08); border-left-color: var(--violet-bright); }
+  .pyramid-level.lv3 .pyramid-content { background: rgba(14,12,20,0.5); }
+  .pyramid-level.lv4 .pyramid-content { background: rgba(10,9,14,0.5); }
+
+  .pyramid-name {
+    font-family: 'Oswald', sans-serif;
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--cream);
+    margin-bottom: 6px;
+    letter-spacing: 1px;
+  }
+
+  .pyramid-desc { font-size: 13px; color: var(--text); }
+
+  /* NEIGHBORHOOD */
+  .neighborhood-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 18px;
+    margin: 30px 0;
+  }
+
+  .neighborhood-card {
+    border: 1px solid var(--border-bright);
+    padding: 20px;
+    background: var(--panel2);
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.2s ease;
+  }
+
+  .neighborhood-card:hover { border-color: var(--red-bright); }
+
+  .neighborhood-card::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(to right, var(--red-bright), transparent);
+    opacity: 0;
+    transition: opacity 0.2s ease;
+  }
+
+  .neighborhood-card:hover::after { opacity: 1; }
+
+  .neighborhood-name {
+    font-family: 'Oswald', sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--acid);
+    letter-spacing: 2px;
+    margin-bottom: 4px;
+    text-shadow: 0 0 10px rgba(184,255,0,0.3);
+  }
+
+  .neighborhood-control {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    color: var(--red-bright);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+
+  .neighborhood-desc { font-size: 13px; color: var(--text); line-height: 1.6; }
+
+  /* ARCHETYPE */
+  .archetype-block {
+    border: 1px solid var(--border-bright);
+    margin-bottom: 28px;
+    overflow: hidden;
+  }
+
+  .archetype-header {
+    background: var(--red);
+    padding: 16px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .archetype-title {
+    font-family: 'Oswald', sans-serif;
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--cream);
+    letter-spacing: 3px;
+  }
+
+  .archetype-dept {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    color: rgba(220,200,255,0.7);
+    letter-spacing: 2px;
+  }
+
+  .archetype-body { padding: 24px; background: var(--panel2); }
+
+  /* MISSION BLOCK */
+  .mission-block {
+    background: var(--panel);
+    border: 1px solid var(--red-bright);
+    padding: 32px;
+    margin: 32px 0;
+    position: relative;
+    box-shadow: 0 0 30px rgba(192,16,42,0.08);
+  }
+
+  .mission-block::before {
+    content: 'OPERAÇÃO INICIAL';
+    position: absolute;
+    top: -1px; left: 20px;
+    background: var(--red-bright);
+    color: var(--cream);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 3px;
+    padding: 4px 12px;
+    transform: translateY(-100%);
+  }
+
+  .mission-title {
+    font-family: 'Oswald', sans-serif;
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--cream);
+    letter-spacing: 3px;
+    margin-bottom: 22px;
+  }
+
+  /* TABLE */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    font-size: 13px;
+  }
+
+  th {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--violet);
+    text-align: left;
+  }
+
+  td {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text);
+    vertical-align: top;
+  }
+
+  tr:hover td { background: rgba(123,63,188,0.04); }
+  td strong { color: var(--cream); }
+
+  /* DRUG TAGS */
+  .drug-tag {
+    display: inline-block;
+    padding: 2px 10px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    border: 1px solid;
+  }
+
+  .drug-tag.red { border-color: var(--red-bright); color: var(--red-bright); }
+  .drug-tag.violet { border-color: var(--violet-bright); color: var(--violet-bright); }
+  .drug-tag.acid { border-color: var(--acid-dim); color: var(--acid-dim); }
+  .drug-tag.cream { border-color: var(--text-dim); color: var(--text-dim); }
+
+  /* CALLOUT */
+  .callout {
+    background: rgba(192,16,42,0.07);
+    border: 1px solid rgba(192,16,42,0.25);
+    padding: 20px 24px;
+    margin: 24px 0;
+    font-size: 14px;
+    font-style: italic;
+    color: var(--text);
+  }
+
+  .callout strong { color: var(--red-bright); font-style: normal; }
+
+  /* ACT BLOCKS */
+  .act-block {
+    border: 1px solid var(--border-bright);
+    margin-bottom: 28px;
+    overflow: hidden;
+  }
+
+  .act-header {
+    background: linear-gradient(90deg, var(--red) 0%, var(--violet) 100%);
+    padding: 14px 24px;
+    display: flex;
+    align-items: center;
+    gap: 18px;
+  }
+
+  .act-number {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 32px;
+    font-weight: 900;
+    color: rgba(255,255,255,0.15);
+    line-height: 1;
+  }
+
+  .act-title {
+    font-family: 'Oswald', sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--cream);
+    letter-spacing: 3px;
+  }
+
+  .act-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    color: rgba(220,200,255,0.6);
+    letter-spacing: 2px;
+    margin-top: 2px;
+  }
+
+  .act-body { padding: 24px; background: var(--panel2); }
+  .act-body p { font-size: 14px; margin-bottom: 12px; }
+
+  /* FOOTER */
+  .doc-footer {
+    margin-top: 60px;
+    padding-top: 28px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    color: var(--text-dim);
+    letter-spacing: 2px;
+  }
+
+  /* SCROLLBAR */
+  ::-webkit-scrollbar { width: 4px; height: 4px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--violet); }
+
+  /* RESPONSIVE */
+  @media (max-width: 600px) {
+    .section { padding: 40px 20px; }
+    .section-number { font-size: 50px; }
+    .section-title { font-size: 30px; }
+    .nav-btn { padding: 14px 14px; font-size: 10px; }
+    .pyramid-label { display: none; }
+    .faction-header { flex-direction: column; align-items: flex-start; }
+  }
+
+  .sep { border: none; border-top: 1px solid var(--border); margin: 42px 0; }
+  .sep.violet { border-top-color: var(--violet); opacity: 0.4; }
+
+  /* CORRUPTION METER */
+  .corruption-bar {
+    height: 4px;
+    background: var(--border);
+    margin-top: 8px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .corruption-fill {
+    height: 100%;
+    background: linear-gradient(to right, var(--violet-bright), var(--red-bright));
+    box-shadow: 0 0 8px var(--red-glow);
+  }
+</style>
+</head>
+<body>
+
+<!-- COVER -->
+<div class="cover" id="cover">
+  <div class="cover-scan"></div>
+  <div class="cover-grid"></div>
+  <div class="cover-corner tl"></div>
+  <div class="cover-corner tr"></div>
+  <div class="cover-corner bl"></div>
+  <div class="cover-corner br"></div>
+
+  <div class="cover-eyebrow">Dossiê Confidencial — RPG de Mesa — Nível Máster</div>
+  <div class="cover-title">MOROZ</div>
+  <div class="cover-subtitle-line">Nova Iorque · Outubro 1999</div>
+  <div class="cover-tagline-big">A CIDADE QUE APODRECEU POR DENTRO</div>
+  <div class="cover-divider"></div>
+  <div class="cover-tagline">"Tem gente que conserta o sistema. Tem gente que aprende a viver com o que resta. Você vai descobrir qual é qual quando não tiver mais opção."</div>
+  <div class="stamp">Classificado</div>
+  <button class="enter-btn" onclick="enterDossier()">▸ Abrir Dossiê</button>
+</div>
+
+<!-- MAIN -->
+<div class="main" id="main">
+
+  <nav class="nav">
+    <button class="nav-btn active" onclick="showSection('mundo', this)">O Mundo</button>
+    <button class="nav-btn" onclick="showSection('cronologia', this)">Cronologia</button>
+    <button class="nav-btn" onclick="showSection('conspiracao', this)">Conspiração</button>
+    <button class="nav-btn" onclick="showSection('figuras', this)">Figuras</button>
+    <button class="nav-btn" onclick="showSection('faccoes', this)">Facções</button>
+    <button class="nav-btn" onclick="showSection('drogas', this)">Drogas</button>
+    <button class="nav-btn" onclick="showSection('cidade', this)">A Cidade</button>
+    <button class="nav-btn" onclick="showSection('arco', this)">Arco</button>
+    <button class="nav-btn" onclick="showSection('departamentos', this)">Departamentos</button>
+    <button class="nav-btn" onclick="showSection('inicio', this)">O Começo</button>
+  </nav>
+
+  <!-- ===================== O MUNDO ===================== -->
+  <section class="section active" id="mundo">
+    <div class="section-header">
+      <div class="section-number">01</div>
+      <div>
+        <div class="section-title">O MUNDO</div>
+        <div class="section-label">Ambientação — Tom — Textura</div>
+      </div>
+    </div>
+
+    <p class="lead">Nova Iorque, outubro de 1999. A cidade nunca limpou as ruas. Quando o resto do país falava em prosperidade, aqui o dinheiro foi para os andares de cima e o cheiro ficou embaixo. Vinte e cinco anos de promessas enterradas no asfalto. Isso é o que resta.</p>
+
+    <h2>Uma Cidade em Pé por Inércia</h2>
+    <p>A Nova Iorque deste mundo nunca teve a sua grande virada dos anos 90. O prefeito que prometeu ordem entrou pelo voto do medo e trouxe outra coisa. O crime não desapareceu — foi reorganizado. Os bairros do Bronx ainda cheiram a borracha queimada quando o vento vem do norte. O metrô ainda tem os grafites dos anos 80 porque ninguém se incomoda em apagar o que você vai ver amanhã de novo.</p>
+
+    <p>A cidade tem dois andares. No de cima: corporações, mídia, políticos, restaurantes com espera de dois meses. No de baixo: o resto. Entre os dois andares não há escada — só uma porta trancada por fora.</p>
+
+    <h2>Tecnologia Que Chegou Torta</h2>
+    <p>Os computadores existem, a internet existe, os celulares existem. Nas sedes das corporações há servidores do tamanho de quartos, telas verdes que cospem dados o dia inteiro. Os hackers têm suas próprias linguagens, seus próprios códigos, seus próprios bairros. Isso não é ficção científica. É burocracia com orçamento.</p>
+
+    <p>O Grupo Meridian tem laboratórios que fazem coisas que nenhum regulamento federal cobre. Soldados testados com compostos sintéticos. Câmeras de vigilância em um de cada três postes no Midtown. Arquivos digitais de praticamente todo morador de três bairros do Bronx. Nenhum disso está no noticiário.</p>
+
+    <h2>Tom e Referências</h2>
+    <p>Pense no que a câmera veria: chuva em neon. Sangue no asfalto de um beco de Hell's Kitchen. Um corredor de armazém iluminado por um único fluorescente piscando. Um homem de terno impecável saindo de um carro preto sem placa. A câmera lenta durante uma briga em escada. O close no rosto de alguém que acabou de descobrir que estava do lado errado.</p>
+    <p>Referências visuais e de tom: <strong>Blade, Matrix, John Woo, Max Payne, Se7en, Resident Evil, Heat, Léon</strong>. A violência é coreografada mas tem peso. O mundo é estilizado mas não é seguro. E o herói — se é que existe herói — está encharcado, exausto, e com o inimigo de um lado e a lei do outro.</p>
+
+    <div class="callout">
+      <strong>Nota do Mestre:</strong> Os jogadores não são heróis. São pessoas com um conjunto específico de habilidades e um conjunto ainda mais específico de problemas. O arco deles é de redenção porque eles precisam dela, não porque merecem ela. Que essa distinção apareça na mesa.
+    </div>
+
+    <h2>Sensações</h2>
+    <p>Sons: sirenes de madrugada, o metrô debaixo do chão, hip-hop saindo de carros parados, alguém gritando no andar de cima, chuva no asfalto. Cheiros: diesel, colchão molhado, cigarro, frango frito às duas da manhã, pólvora. Cores: neon vermelho-roxo refletido na poça de chuva, o amarelo dos postes estragados, o cinza perpétuo do céu de inverno, o laranja dos barris em chamas. E sob tudo isso, uma quietude estranha nos bairros mais afetados — como se as pessoas tivessem aprendido a querer menos.</p>
+
+    <div class="doc-footer">
+      <span>MOROZ — A CIDADE QUE APODRECEU POR DENTRO</span>
+      <span>SEÇÃO 01 / 10</span>
+    </div>
+  </section>
+
+  <!-- ===================== CRONOLOGIA ===================== -->
+  <section class="section" id="cronologia">
+    <div class="section-header">
+      <div class="section-number">02</div>
+      <div>
+        <div class="section-title">CRONOLOGIA</div>
+        <div class="section-label">1975 — 2000 — O Caminho Até Aqui</div>
+      </div>
+    </div>
+
+    <p class="lead">A história não tem um momento de virada. Tem uma série de pequenas decisões que, olhando para trás, formam uma linha reta em direção a onde estamos agora.</p>
+
+    <div class="timeline">
+
+      <div class="timeline-item">
+        <div class="timeline-year">1975</div>
+        <div class="timeline-text">Nova Iorque declara insolvência técnica. O governo federal recusa socorro. O prefeito demite <strong>40.000 funcionários públicos</strong> em um único dia. A NYPD perde um terço do efetivo. O que resta começa a fazer acordos.</div>
+      </div>
+
+      <div class="timeline-item">
+        <div class="timeline-year">1977</div>
+        <div class="timeline-text">O apagão de julho. 25 horas no escuro. Saques em 31 bairros. Mais de <strong>1.600 estabelecimentos</strong> vandalizados ou destruídos. É o ano que o South Bronx começa a queimar de verdade.</div>
+      </div>
+
+      <div class="timeline-item">
+        <div class="timeline-year">1980–1985</div>
+        <div class="timeline-text">O crime atinge o pico. Tráfico de heroína consolida <strong>três famílias italianas — os Calabrese, os Marotti e os De Filippo</strong> como donas do mercado no Bronx e Harlem. A polícia cobre o que pode ser coberto. Os acordos desta época definem quem será quem nos próximos vinte anos. A Família Calabrese, sob <strong>Enzo "Mãos-Frias" Calabrese</strong>, é a maior. Os De Filippo operam nas docas. Os Marotti controlam Harlem.</div>
+      </div>
+
+      <div class="timeline-item">
+        <div class="timeline-year">1986</div>
+        <div class="timeline-text">O crack chega ao Bronx. Em dezoito meses está em todo lugar. As famílias italianas perdem território para grupos locais. Começa a guerra de rua de 87. A NYPD usa o caos para justificar orçamento maior. O orçamento vai para outro lugar.</div>
+      </div>
+
+      <div class="timeline-item">
+        <div class="timeline-year">1989</div>
+        <div class="timeline-text"><strong>Elias Holt</strong>, 58 anos, senador eleito por Connecticut. Herdeiro de indústria farmacêutica e imobiliária. Seus doadores incluem três ex-diretores da CIA e um cardeal. Começa a frequentar reuniões fechadas em Manhattan.</div>
+      </div>
+
+      <div class="timeline-item">
+        <div class="timeline-year">1991</div>
+        <div class="timeline-text">Fundação do <strong>Grupo Meridian</strong> como subsidiária da Holt Consolidated. Abre como empresa de segurança privada. Em dois anos, adquire divisão farmacêutica. O diretor-operacional nomeado é <strong>Carsten Mohr</strong>, ex-analista da CIA com histórico redactado.</div>
+      </div>
+
+      <div class="timeline-item">
+        <div class="timeline-year">1993</div>
+        <div class="timeline-text"><strong>Gordon Lash</strong> vence a prefeitura com campanha financiada por comitês ligados ao Meridian. <strong>Raymond Dusk</strong> é nomeado comissário da NYPD. Três tenentes leais a Dusk são promovidos imediatamente. Começa o processo silencioso de reorganização da polícia.</div>
+      </div>
+
+      <div class="timeline-item">
+        <div class="timeline-year">1994</div>
+        <div class="timeline-text">Início do <strong>Projeto LETHE</strong> nos laboratórios do Meridian. Objetivo declarado: tratamento de PTSD em veteranos. O composto desenvolvido funciona — mas os efeitos colaterais são imprevistos. Erosão gradual da iniciativa emocional. Holt lê o relatório e arquiva para revisão.</div>
+      </div>
+
+      <div class="timeline-item">
+        <div class="timeline-year">1995</div>
+        <div class="timeline-text">A <strong>Igreja do Voluntário</strong> abre seu primeiro centro comunitário no Bronx. Em dois anos, trinta e um centros. O Reverendo <strong>Solomon "Boca-de-Mel" Ayre</strong> é o rosto público. O Conselho de Visão acima dele nunca aparece em fotos.</div>
+      </div>
+
+      <div class="timeline-item">
+        <div class="timeline-year">1995 — paralelo</div>
+        <div class="timeline-text">A Família Calabrese fecha acordo de não-agressão com o Grupo Meridian. <strong>Enzo "Mãos-Frias" Calabrese</strong> recebe proteção policial para suas operações em troca de silêncio sobre movimentações do Meridian no Bronx. Os De Filippo e Marotti não são incluídos no acordo — e começam a perder território gradualmente.</div>
+      </div>
+
+      <div class="timeline-item red">
+        <div class="timeline-year">1996</div>
+        <div class="timeline-text">LETHE começa a ser distribuído em microdoses nos centros de saúde da Igreja. Misturado em vitaminas. <strong>Bairros-teste: South Bronx, East Harlem, partes de Queens.</strong> Nenhum voluntário é informado.</div>
+      </div>
+
+      <div class="timeline-item red">
+        <div class="timeline-year">1997</div>
+        <div class="timeline-text">A droga de rua <strong>NULO</strong> aparece no mercado. Barata. Distribuída pela Organizatsiya de <strong>Pavel "O Contador" Zhigarev</strong>, que não sabe da composição real. Em oito meses domina o mercado em quatro bairros do Bronx e dois de Harlem. Holt aprova a segunda fase.</div>
+      </div>
+
+      <div class="timeline-item">
+        <div class="timeline-year">1997 — paralelo</div>
+        <div class="timeline-text">O Tong do Dragão Vermelho recusa proposta do Meridian para compra de território em Chinatown. Dois atentados contra a liderança do Tong nos meses seguintes. A líder do Tong, <strong>Yue "Dragão-de-Ferro" Bai</strong>, sobrevive aos dois e não esquece.</div>
+      </div>
+
+      <div class="timeline-item">
+        <div class="timeline-year">1998</div>
+        <div class="timeline-text">Série de desaparecimentos no South Bronx e East Harlem. Maioria: moradores sem documentos, ex-presidiários, pessoas sem família próxima. Os casos chegam de bairros diferentes para três distritos diferentes. Ninguém cruza os dados por um ano.</div>
+      </div>
+
+      <div class="timeline-item red">
+        <div class="timeline-year">1999 — 19 DE OUTUBRO</div>
+        <div class="timeline-text"><strong>Ponto de partida da campanha.</strong> Policiais de departamentos diferentes recebem, cada um pelo seu canal habitual, uma ordem de verificação de denúncia: suspeita de laboratório de entorpecentes no <em>1847 Webster Avenue, Bronx.</em> Cada um chega sem saber quem são os outros. O que encontram não é o que ninguém esperava. Ainda naquela noite, o Tenente <strong>Marcus Breel</strong> orquestra a plantação de evidências. O delator <strong>Jorge Mena</strong> é encontrado morto. Overdose documentada. Os policiais são suspensos em quarenta e oito horas. O arquivo some. Ninguém lhes explica nada.</div>
+      </div>
+
+      <div class="timeline-item">
+        <div class="timeline-year">NOVEMBRO — DEZEMBRO 1999</div>
+        <div class="timeline-text">Transferidos para a SRD. Casos mortos, burocracia, silêncio. Tratados como instrumentos de serviço sujo por quem os comanda. A cidade que os destruiu continua funcionando. <strong>Alguém, em algum lugar, acha que o assunto está encerrado.</strong></div>
+      </div>
+
+    </div>
+
+    <div class="doc-footer">
+      <span>MOROZ — A CIDADE QUE APODRECEU POR DENTRO</span>
+      <span>SEÇÃO 02 / 10</span>
+    </div>
+  </section>
+
+  <!-- ===================== CONSPIRAÇÃO ===================== -->
+  <section class="section" id="conspiracao">
+    <div class="section-header">
+      <div class="section-number">03</div>
+      <div>
+        <div class="section-title">A CONSPIRAÇÃO</div>
+        <div class="section-label">Hierarquia — Projeto LETHE — Os Arquitetos</div>
+      </div>
+    </div>
+
+    <p class="lead">A conspiração tem camadas porque foi construída com paciência. Cada andar não sabe o que o andar de cima está fazendo. Cada pessoa tem sua agenda, suas dívidas, seus medos.</p>
+
+    <h2>Os Jardineiros</h2>
+    <p>A fraternidade fechada fundada por Holt em Yale, 1952. Hoje tem dezessete membros ativos, todos com mais de cinquenta anos, todos em posições de influência: juízes federais, dois diretores de órgãos de inteligência, um cardeal, três CEOs. Não se reúnem com frequência. Quando se reúnem, não escrevem atas.</p>
+
+    <p>A filosofia deles: a humanidade não tem falha moral, tem falha estrutural. As pessoas são incapazes de se governar em escala. A solução não é controle pela força — é a remoção gradual da necessidade de resistir. Você não precisa dominar quem está contente. LETHE produz um tipo muito particular de contentamento.</p>
+
+    <p>Holt chama isso de <em>misericórdia.</em> E ele acredita nisso genuinamente — o que o torna mais perigoso do que qualquer fanático. As pessoas abaixo dele no esquema, entretanto, fazem o que fazem por dinheiro, poder, e covardia. Essas sim são ruins de um jeito simples e sujo.</p>
+
+    <div class="callout">
+      <strong>Para o Mestre:</strong> Holt é o arquiteto. Não é um megalomaníaco. Não ri ao apertar o botão. É um homem velho que passou sessenta anos construindo uma convicção de que o mundo só melhora quando as pessoas param de lutar contra quem o governa. A tragédia de Holt é que ele não é idiota — e o horror é que o plano funciona. O que fazer com um vilão que está certo nos dados e errado em tudo que importa? Isso é o problema que os jogadores precisam resolver.
+    </div>
+
+    <h2>A Hierarquia em Campo</h2>
+
+    <div class="pyramid">
+
+      <div class="pyramid-level lv1">
+        <div class="pyramid-label">Nível I</div>
+        <div class="pyramid-content">
+          <div class="pyramid-name">Elias Holt — Os Jardineiros</div>
+          <div class="pyramid-desc">Senador de Connecticut, 69 anos. Visível em Washington, invisível em Nova Iorque. Determina a direção. Não dá ordens diretas há quinze anos. Tudo chega a ele filtrado. A paciência é sua arma mais velha.</div>
+        </div>
+      </div>
+
+      <div class="pyramid-level lv2">
+        <div class="pyramid-label">Nível II-A</div>
+        <div class="pyramid-content">
+          <div class="pyramid-name">Grupo Meridian + Igreja do Voluntário</div>
+          <div class="pyramid-desc">A estrutura operacional. O Meridian produz, financia e protege. A Igreja distribui. Os dois nunca aparecem no mesmo documento. Carsten Mohr gerencia o operacional do Meridian no dia a dia.</div>
+        </div>
+      </div>
+
+      <div class="pyramid-level lv2">
+        <div class="pyramid-label">Nível II-B</div>
+        <div class="pyramid-content">
+          <div class="pyramid-name">Comissário Raymond Dusk + Prefeito Gordon Lash</div>
+          <div class="pyramid-desc">O braço político e policial. Dusk sabe da maioria. Lash sabe o suficiente para ter medo. Os dois foram colocados onde estão por conexões que remontam a 1990.</div>
+        </div>
+      </div>
+
+      <div class="pyramid-level lv3">
+        <div class="pyramid-label">Nível III</div>
+        <div class="pyramid-content">
+          <div class="pyramid-name">Tenentes e Capitães comprometidos da NYPD</div>
+          <div class="pyramid-desc">~20 oficiais em 8 distritos. Alguns sabem do LETHE. A maioria só sabe que há certas investigações que não se abrem. Cada um tem uma dívida específica com Dusk.</div>
+        </div>
+      </div>
+
+      <div class="pyramid-level lv3">
+        <div class="pyramid-label">Nível III-B</div>
+        <div class="pyramid-content">
+          <div class="pyramid-name">Família Calabrese + Organizatsiya de Brighton Beach</div>
+          <div class="pyramid-desc">Acordos de distribuição. Os Calabrese têm proteção policial para suas operações. Zhigarev distribui NULO sem saber da composição real. Ambos são parceiros por conveniência — não cúmplices ideológicos.</div>
+        </div>
+      </div>
+
+      <div class="pyramid-level lv4">
+        <div class="pyramid-label">Nível IV</div>
+        <div class="pyramid-content">
+          <div class="pyramid-name">Rua, gangues, traficantes de segunda linha</div>
+          <div class="pyramid-desc">Distribuem NULO sem saber o que é. Recebem proteção relativa da polícia. Alguns percebem que o produto tem algo diferente. Poucos sabem fazer a pergunta certa.</div>
+        </div>
+      </div>
+
+    </div>
+
+    <h2>Projeto LETHE — O Que É</h2>
+    <p>LETHE é o rio do esquecimento na mitologia grega. Não acidental. O composto sintético desenvolvido pela Dra. Helena Marsh atua nos receptores de dopamina e serotonina de forma não convencional: não produz euforia. Produz redução gradual da resposta emocional ao desconforto.</p>
+    <p>A pessoa que usa LETHE de forma continuada não fica dopada. Funciona normalmente. Trabalha. Come. Dorme. A diferença está na resposta ao conflito. A indignação que antes levaria alguém a agir chega amortecida. Em quatro a seis meses, o usuário tem dificuldade de sustentar raiva por mais de algumas horas. Em doze meses, reagir a uma injustiça exige um esforço que parece não valer o custo.</p>
+    <p>O composto não cria dependência química. Isso foi intencional. Um viciado chama atenção. Um cidadão pacífico não.</p>
+
+    <h2>A Escala do Crime</h2>
+    <p>Nos bairros-teste, desde 1996: <strong>dezenas de milhares de pessoas</strong> em exposição contínua através de suplementos da Igreja do Voluntário. Nos bairros de distribuição de NULO: mais dezenas de milhares desde 1997. Nos dados que os protagonistas ainda não têm: os desaparecimentos de 1998 não foram simples. Pessoas que desenvolveram resistência ao composto — anomalias biológicas — foram identificadas, capturadas, levadas para os laboratórios do Meridian em New Jersey. Os dados de longo prazo do Projeto são construídos em cima do que aconteceu com eles.</p>
+    <p>Isso não é corrupção de rua. Isso é um crime contra a humanidade conduzido por um senador que acredita que está salvando o mundo.</p>
+
+    <div class="doc-footer">
+      <span>MOROZ — A CIDADE QUE APODRECEU POR DENTRO</span>
+      <span>SEÇÃO 03 / 10</span>
+    </div>
+  </section>
+
+  <!-- ===================== FIGURAS ===================== -->
+  <section class="section" id="figuras">
+    <div class="section-header">
+      <div class="section-number">04</div>
+      <div>
+        <div class="section-title">FIGURAS</div>
+        <div class="section-label">NPJs Principais — Dossiês Individuais</div>
+      </div>
+    </div>
+
+    <p class="lead">As pessoas que movem essa cidade. Algumas no centro da conspiração. Algumas nos arredores. Todas com suas razões.</p>
+
+    <h2>Antagonistas e Estrutura de Poder</h2>
+    <div class="card-grid">
+
+      <div class="npc-card">
+        <div class="npc-card-header">
+          <div class="npc-avatar">EH</div>
+          <div>
+            <div class="npc-name">Elias Holt</div>
+            <div class="npc-role">Senador — Arquiteto dos Jardineiros</div>
+          </div>
+        </div>
+        <div class="npc-card-body">
+          <div class="npc-stat"><span class="npc-stat-label">Idade</span><span class="npc-stat-value">69 anos</span></div>
+          <div class="npc-stat"><span class="npc-stat-label">Base</span><span class="npc-stat-value">Greenwich, Connecticut</span></div>
+          <div class="npc-stat"><span class="npc-stat-label">Fachada</span><span class="npc-stat-value">Senador moderado, filantropo</span></div>
+          <div class="npc-stat"><span class="npc-stat-label">Real</span><span class="npc-stat-value">Arquiteto do Projeto LETHE</span></div>
+          <div class="npc-desc">Alto, seco, cabelos completamente brancos. Fala pouco e sempre no plural. Tem uma biblioteca de 3.000 volumes sobre filosofia política e rituais esotéricos. O maior perigo dele é a paciência — e que ele acredita sinceramente que está fazendo o certo. Confrontá-lo com evidências não quebra sua convicção. Quebra a sua.</div>
+        </div>
+      </div>
+
+      <div class="npc-card">
+        <div class="npc-card-header">
+          <div class="npc-avatar">CM</div>
+          <div>
+            <div class="npc-name">Carsten Mohr</div>
+            <div class="npc-role">Grupo Meridian — Diretor Operacional</div>
+          </div>
+        </div>
+        <div class="npc-card-body">
+          <div class="npc-stat"><span class="npc-stat-label">Idade</span><span class="npc-stat-value">52 anos</span></div>
+          <div class="npc-stat"><span class="npc-stat-label">Base</span><span class="npc-stat-value">1 Meridian Plaza, Midtown</span></div>
+          <div class="npc-stat"><span class="npc-stat-label">Fachada</span><span class="npc-stat-value">VP de Operações Corporativas</span></div>
+          <div class="npc-stat"><span class="npc-stat-label">Real</span><span class="npc-stat-value">Quem executa o que Holt planeja</span></div>
+          <div class="npc-desc">Ex-analista da CIA, histórico classificado. Não tem convicções filosóficas de Holt — tem lealdade e pragmatismo. É o contato direto entre Holt e os Auditores. Quando algo sai errado no campo, é Mohr quem resolve. Nunca nervoso. Nunca com pressa. Isso é o que o torna assustador.</div>
+        </div>
+      </div>
+
+      <div class="npc-card">
+        <div class="npc-card-header">
+          <div class="npc-avatar">RD</div>
+          <div>
+            <div class="npc-name">Raymond Dusk</div>
+            <div class="npc-role">Comissário — NYPD</div>
+          </div>
+        </div>
+        <div class="npc-card-body">
+          <div class="npc-stat"><span class="npc-stat-label">Idade</span><span class="npc-stat-value">57 anos</span></div>
+          <div class="npc-stat"><span class="npc-stat-label">Base</span><span class="npc-stat-value">1 Police Plaza</span></div>
+          <div class="npc-stat"><span class="npc-stat-label">Fachada</span><span class="npc-stat-value">Comissário linha-dura, anti-crime</span></div>
+          <div class="npc-stat"><span class="npc-stat-label">Real</span><span class="npc-stat-value">Controlador da NYPD para Holt</span></div>
+          <div class="npc-desc">22 anos na NYPD antes de virar comissário. Convenceu-se, ao longo dos anos, de que o que faz é necessário. Não é cruel por instinto, é cruel por convicção. Isso o torna mais perigoso que qualquer sádico.</div>
+        </div>
+      </div>
+
+      <div class="npc-card">
+        <div class="npc-card-header">
+          <div class="npc-avatar">GL</div>
+          <div>
+            <div class="npc-name">Gordon Lash</div>
+            <div class="npc-role">Prefeito de Nova Iorque</div>
+          </div>
+        </div>
+        <div class="npc-card-body">
+          <div class="npc-stat"><span class="npc-stat-label">Idade</span><span class="npc-stat-value">54 anos</span></div>
+          <div class="npc-stat"><span class="npc-stat-label">Base</span><span class="npc-stat-value">Gracie Mansion, Upper East Side</span></div>
+          <div class="npc-stat"><span class="npc-stat-label">Fachada</span><span class="npc-stat-value">Prefeito populista, voz do povo</span></div>
+          <div class="npc-stat"><span class="npc-stat-label">Real</span><span class="npc-stat-value">Fantoche assustado com dívidas antigas</span></div>
+          <div class="npc-desc">Sabe de parte do que acontece. Não sabe do LETHE. Prefere não saber. Bebe no escritório desde 1997. Continua assinando o que colocam na frente dele. É uma figura de pena, mas pena não é inocência.</div>
+        </div>
+      </div>
+
+      <div class="npc-card">
+        <div class="npc-card-header">
+          <div class="npc-avatar">MB</div>
+          <div>
+            <div class="npc-name">Marcus Breel</div>
+            <div class="npc-role">Tenente — NYPD Homicídios, 44º Distrito</div>
+          </div>
+        </div>
+        <div class="npc-card-body">
+          <div class="npc-stat"><span class="npc-stat-label">Idade</span><span class="npc-stat-value">44 anos</span></div>
+          <div class="npc-stat"><span class="npc-stat-label">Base</span><span class="npc-stat-value">44º Distrito, Bronx</span></div>
+          <div class="npc-stat"><span class="npc-stat-label">Fachada</span><span class="npc-stat-value">Tenente eficiente, bom histórico</span></div>
+          <div class="npc-stat"><span class="npc-stat-label">Real</span><span class="npc-stat-value">Quem plantou a cilada para os PJs</span></div>
+          <div class="npc-desc">Inteligente e covarde, na medida em que ambas se complementam. A cilada não foi pessoal, foi preventiva. Dormiu bem depois. Se perceber que os protagonistas sobreviveram e estão chegando, vai entrar em colapso antes de partir para a ofensiva.</div>
+        </div>
+      </div>
+
+      <div class="npc-card">
+        <div class="npc-card-header">
+          <div class="npc-avatar">SA</div>
+          <div>
+            <div class="npc-name">Rev. Solomon "Boca-de-Mel" Ayre</div>
+            <div class="npc-role">Igreja do Voluntário — Líder Público</div>
+          </div>
+        </div>
+        <div class="npc-card-body">
+          <div class="npc-stat"><span class="npc-stat-label">Idade</span><span class="npc-stat-value">61 anos</span></div>
+          <div class="npc-stat"><span class="npc-stat-label">Base</span><span class="npc-stat-value">HQ da Igreja, Bronx</span></div>
+          <div class="npc-stat"><span class="npc-stat-label">Fachada</span><span class="npc-stat-value">Líder religioso, humanitário</span></div>
+          <div class="npc-stat"><span class="npc-stat-label">Real</span><span class="npc-stat-value">Cúmplice involuntário — até certo ponto</span></div>
+          <div class="npc-desc">Genuinamente acredita na missão da Igreja. Há um Conselho de Visão acima dele que ele escolheu não questionar. Confrontado com evidências, vai primeiro negar, depois negociar, depois quebrar. O que faz com os pedaços vai dizer o tipo de homem que é no fundo.</div>
+        </div>
+      </div>
+
+      <div class="npc-card">
+        <div class="npc-card-header">
+          <div class="npc-avatar">HM</div>
+          <div>
+            <div class="npc-name">Dra. Helena Marsh</div>
+            <div class="npc-role">Grupo Meridian — Cientista-Chefe, LETHE</div>
+          </div>
+        </div>
+        <div class="npc-card-body">
+          <div class="npc-stat"><span class="npc-stat-label">Idade</span><span class="npc-stat-value">41 anos</span></div>
+          <div class="npc-stat"><span class="npc-stat-label">Base</span><span class="npc-stat-value">Laboratório Meridian, New Jersey</span></div>
+          <div class="npc-stat"><span class="npc-stat-label">Fachada</span><span class="npc-stat-value">Pesquisadora de bioquímica comportamental</span></div>
+          <div class="npc-stat"><span class="npc-stat-label">Real</span><span class="npc-stat-value">Criadora de LETHE. Está arrependida.</span></div>
+          <div class="npc-desc">Começou acreditando que trabalhava em tratamento de PTSD. Quando entendeu o que o projeto virou, já tinha assinado cinco anos de sigilo. Três pesquisadoras saíram antes dela. Nenhuma publicou nada depois. Seu nome está na lista que os protagonistas encontram.</div>
+        </div>
+      </div>
+
+    </div>
+
+    <hr class="sep violet">
+
+    <h2>Figuras Ambíguas e Aliados em Potencial</h2>
+    <div class="card-grid">
+
+      <div class="npc-card">
+        <div class="npc-card-header">
+          <div class="npc-avatar">AR</div>
+          <div>
+            <div class="npc-name">Ariadne</div>
+            <div class="npc-role">Ex-FBI — Investigadora Independente</div>
+          </div>
+        </div>
+        <div class="npc-card-body">
+          <div class="npc-stat"><span class="npc-stat-label">Idade</span><span class="npc-stat-value">48 anos (estimado)</span></div>
+          <div class="npc-stat"><span class="npc-stat-label">Base</span><span class="npc-stat-value">Red Hook, Brooklyn</span></div>
+          <div class="npc-stat"><span class="npc-stat-label">Histórico</span><span class="npc-stat-value">Ex-FBI — Saída 1996, circunstâncias não divulgadas</span></div>
+          <div class="npc-desc">Não usa sobrenome. Construiu durante três anos um dossiê parcial sobre LETHE — sozinha, metodicamente, por razões que não compartilha facilmente. Tem peças que os protagonistas precisam. O problema é que ela vai testar qualquer pessoa antes de confiar. A metodologia de teste não é gentil. Não representa organização nenhuma — e desconfia de quem representa.</div>
+        </div>
+      </div>
+
+      <div class="npc-card">
+        <div class="npc-card-header">
+          <div class="npc-avatar">MS</div>
+          <div>
+            <div class="npc-name">Miguel "Santo" Santiago</div>
+            <div class="npc-role">Los Muertos Vivos — Líder</div>
+          </div>
+        </div>
+        <div class="npc-card-body">
+          <div class="npc-stat"><span class="npc-stat-label">Idade</span><span class="npc-stat-value">38 anos</span></div>
+          <div class="npc-stat"><span class="npc-stat-label">Base</span><span class="npc-stat-value">Washington Heights / Bronx</span></div>
+          <div class="npc-stat"><span class="npc-stat-label">Motivação</span><span class="npc-stat-value">Três primos mortos por NULO</span></div>
+          <div class="npc-desc">Não é um personagem bom no sentido convencional. Lidera gangue violenta com território consolidado. Mas perdeu três primos para o NULO e percebeu que a droga faz algo que nenhuma outra fazia: não mata com abstinência, mata com passividade. Está procurando a mesma coisa que os protagonistas, por razões diferentes.</div>
+        </div>
+      </div>
+
+      <div class="npc-card">
+        <div class="npc-card-header">
+          <div class="npc-avatar">YB</div>
+          <div>
+            <div class="npc-name">Yue "Dragão-de-Ferro" Bai</div>
+            <div class="npc-role">Tong do Dragão Vermelho — Líder</div>
+          </div>
+        </div>
+        <div class="npc-card-body">
+          <div class="npc-stat"><span class="npc-stat-label">Idade</span><span class="npc-stat-value">51 anos</span></div>
+          <div class="npc-stat"><span class="npc-stat-label">Base</span><span class="npc-stat-value">Chinatown / Hell's Kitchen</span></div>
+          <div class="npc-stat"><span class="npc-stat-label">Histórico</span><span class="npc-stat-value">Sobreviveu a dois atentados do Meridian em 97-98</span></div>
+          <div class="npc-desc">Pragmática ao ponto de parecer fria. Faz negócios com quem tem algo a oferecer. Tem rancor específico contra o Meridian. Tem redes que cruzam a cidade sem passar pelos canais habituais, e acesso a armamento que outros grupos não têm. Qualquer negócio com ela tem preço alto e prazo de pagamento curto.</div>
+        </div>
+      </div>
+
+      <div class="npc-card">
+        <div class="npc-card-header">
+          <div class="npc-avatar">DK</div>
+          <div>
+            <div class="npc-name">Dennis Kowalski</div>
+            <div class="npc-role">Tenente SRD — Subcomandante de Facto</div>
+          </div>
+        </div>
+        <div class="npc-card-body">
+          <div class="npc-stat"><span class="npc-stat-label">Idade</span><span class="npc-stat-value">54 anos</span></div>
+          <div class="npc-stat"><span class="npc-stat-label">Base</span><span class="npc-stat-value">Sede da SRD, Midtown</span></div>
+          <div class="npc-stat"><span class="npc-stat-label">Histórico</span><span class="npc-stat-value">22 anos na NYPD. Nunca promovido além de tenente.</span></div>
+          <div class="npc-desc">Não é mau homem. É um homem que aprendeu o tamanho exato do espaço que ocupa e, em algum momento nos últimos dez anos, decidiu parar de crescer. Faz o que Neihart pede porque a alternativa é pior — e porque vive confortável o suficiente para não precisar de mais. Não está 100% vendido. Olha para o outro lado quando é conveniente, mas não por prazer. Se os protagonistas chegarem na hora certa, com a pergunta certa, pode dar uma pista — nunca nada rastreável. Se a situação ficar grave o bastante, pode vender eles também. Depende do que acharem mais caro no momento.</div>
+        </div>
+      </div>
+
+      <div class="npc-card">
+        <div class="npc-card-header">
+          <div class="npc-avatar">VC</div>
+          <div>
+            <div class="npc-name">Capitão Vicente Carver</div>
+            <div class="npc-role">NYPD — 28º Distrito, Harlem</div>
+          </div>
+        </div>
+        <div class="npc-card-body">
+          <div class="npc-stat"><span class="npc-stat-label">Idade</span><span class="npc-stat-value">49 anos</span></div>
+          <div class="npc-stat"><span class="npc-stat-label">Base</span><span class="npc-stat-value">28º Distrito — Harlem</span></div>
+          <div class="npc-stat"><span class="npc-stat-label">Status</span><span class="npc-stat-value">Sob vigilância interna. Não sabe disso.</span></div>
+          <div class="npc-desc">Foi ele quem mandou a ordem de verificação que os levou ao 1847 Webster Avenue — ou foi seu nome que colocaram na assinatura. Isso ainda não está claro. Quando a cilada caiu, sumiu. Não veio para a imprensa. Não tentou contato. Está sob vigilância interna e pode não saber. O encontro eventual com Carver vai ser tenso, porque a pergunta que os protagonistas vão querer fazer é a mesma que ele pode estar com medo de responder.</div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="doc-footer">
+      <span>MOROZ — A CIDADE QUE APODRECEU POR DENTRO</span>
+      <span>SEÇÃO 04 / 10</span>
+    </div>
+  </section>
+
+  <!-- ===================== FACÇÕES ===================== -->
+  <section class="section" id="faccoes">
+    <div class="section-header">
+      <div class="section-number">05</div>
+      <div>
+        <div class="section-title">FACÇÕES</div>
+        <div class="section-label">Organizações — Poder — Agenda</div>
+      </div>
+    </div>
+
+    <p class="lead">Nova Iorque tem muitos donos e nenhum dono. Cada organização tem território, recurso e intenção. O que varia é o quanto de cada um e em que direção.</p>
+
+    <div class="faction-block">
+      <div class="faction-header">
+        <div class="faction-name">GRUPO MERIDIAN</div>
+        <div class="faction-tag">Corporativo / Antagonista Central</div>
+      </div>
+      <div class="faction-body">
+        <div class="faction-meta">
+          <div class="faction-meta-item"><div class="faction-meta-label">Base</div><div class="faction-meta-value">1 Meridian Plaza, Midtown Manhattan</div></div>
+          <div class="faction-meta-item"><div class="faction-meta-label">Divisões</div><div class="faction-meta-value">Segurança (Auditores), Farmacêutica, Mídia</div></div>
+          <div class="faction-meta-item"><div class="faction-meta-label">Controle Real</div><div class="faction-meta-value">Elias Holt — via holding offshore</div></div>
+          <div class="faction-meta-item"><div class="faction-meta-label">Relação com PJs</div><div class="faction-meta-value">Inimigos diretos a partir do Prólogo</div></div>
+        </div>
+        <p>Os <strong>Auditores</strong> são a divisão de segurança — ex-militares com acesso a RED, estimulante desenvolvido nos laboratórios. Reflexos aumentados, limiar de dor elevado, sem escrúpulos selecionáveis. Aparecem quando a polícia não pode aparecer. Quando os protagonistas os encontram pela primeira vez, no 1847 Webster Avenue, os Auditores estão há dez minutos do lugar. Alguém os mandou para lá também.</p>
+        <p>A divisão de mídia controla três canais de TV local e dois jornais. Não para censurar — para priorizar umas notícias em detrimento de outras. Uma diferença sutil com efeitos práticos enormes.</p>
+      </div>
+    </div>
+
+    <div class="faction-block">
+      <div class="faction-header">
+        <div class="faction-name">NYPD — SRD</div>
+        <div class="faction-tag">Estatal / Base dos Protagonistas</div>
+      </div>
+      <div class="faction-body">
+        <div class="faction-meta">
+          <div class="faction-meta-item"><div class="faction-meta-label">Nome</div><div class="faction-meta-value">Seção de Remanejamento e Disciplina</div></div>
+          <div class="faction-meta-item"><div class="faction-meta-label">Função Oficial</div><div class="faction-meta-value">Policiais em punição disciplinar</div></div>
+          <div class="faction-meta-item"><div class="faction-meta-label">Função Real</div><div class="faction-meta-value">Lixeira. Casos que não devem ser resolvidos.</div></div>
+          <div class="faction-meta-item"><div class="faction-meta-label">Efetivo</div><div class="faction-meta-value">11 policiais + 3 civis</div></div>
+        </div>
+        <p>Os casos que chegam à SRD foram fechados por outros departamentos. A tarefa dos policiais é arquivar, não resolver. Um policial da SRD que resolve um caso cria um problema para quem fechou antes. O comandante real da unidade, por cima de Kowalski, é o <strong>Tenente Coronel Frank Neihart</strong> — homem de Dusk que usa a SRD como ferramenta de limpeza e pressão. Os protagonistas fazem trabalho sujo para ele. Ele sabe que os está usando. Eles vão descobrir o quanto.</p>
+        <p>Entre Neihart e os protagonistas está Kowalski. Não é aliado, não é inimigo declarado. É alguém que aprendeu a viver no espaço que ocupa sem fazer perguntas maiores do que o cargo permite. Tem informação. Às vezes usa. O preço muda dependendo do dia.</p>
+      </div>
+    </div>
+
+    <div class="faction-block">
+      <div class="faction-header">
+        <div class="faction-name">FAMÍLIA CALABRESE</div>
+        <div class="faction-tag">Máfia Italiana / Aliado Potencial Perigoso</div>
+      </div>
+      <div class="faction-body">
+        <div class="faction-meta">
+          <div class="faction-meta-item"><div class="faction-meta-label">Base</div><div class="faction-meta-value">Howard Beach, Queens / Harlem</div></div>
+          <div class="faction-meta-item"><div class="faction-meta-label">Líder</div><div class="faction-meta-value">Enzo "Mãos-Frias" Calabrese, 68 anos</div></div>
+          <div class="faction-meta-item"><div class="faction-meta-label">Número 2</div><div class="faction-meta-value">Tony Calabrese, sobrinho, 41 anos</div></div>
+          <div class="faction-meta-item"><div class="faction-meta-label">Acordo com Meridian</div><div class="faction-meta-value">Proteção policial para operações em troca de silêncio</div></div>
+        </div>
+        <p>A família mais antiga e mais inteligente das três italianas. Enzo fechou o acordo com o Meridian em 1995 porque reconheceu que a maré estava mudando — melhor estar do lado que controla a polícia do que contra ele. <strong>Tony "Cara-Feia"</strong>, o sobrinho, gere o dia a dia e é muito menos paciente que o tio. Tem modos de cão raivoso e instintos de sobrevivência afiados pelo Bronx.</p>
+        <p>Os Calabrese têm algo que pode ser útil para os protagonistas: <strong>memória</strong>. Eles estiveram presentes quando o Meridian começou a se mover na cidade. Enzo sabe de coisas que Holt acha que foram enterradas. O problema é que Enzo não entrega nada de graça — e Tony acha que policiais deveriam ser usados, não ajudados.</p>
+        <p>As outras duas famílias italianas — <strong>os Marotti</strong> (Harlem) e <strong>os De Filippo</strong> (docas de Brooklyn) — foram gradualmente prejudicadas pela proteção diferenciada que os Calabrese receberam. Têm raiva. Raiva que os protagonistas podem usar.</p>
+      </div>
+    </div>
+
+    <div class="callout">
+      <strong>Nota para o Mestre — Contatos, não Grupo:</strong> Não há facção formal de "heróis independentes" neste mundo. Ariadne opera sozinha. A jornalista que foi travada opera sozinha. O ex-médico opera sozinho. Ao longo da campanha, os protagonistas podem construir pontes entre essas pessoas — mas organicamente, por escolha, não porque a estrutura já estava pronta. Um grupo pode surgir. Ou não. O que existe agora são indivíduos com motivações convergentes e desconfiança mútua. Isso é mais honesto com o mundo.
+    </div>
+
+    <div class="faction-block">
+      <div class="faction-header">
+        <div class="faction-name">ORGANIZATSIYA DE BRIGHTON BEACH</div>
+        <div class="faction-tag">Crime Organizado Russo / Neutro-Hostil</div>
+      </div>
+      <div class="faction-body">
+        <div class="faction-meta">
+          <div class="faction-meta-item"><div class="faction-meta-label">Base</div><div class="faction-meta-value">Brighton Beach, Brooklyn</div></div>
+          <div class="faction-meta-item"><div class="faction-meta-label">Líder</div><div class="faction-meta-value">Pavel "O Contador" Zhigarev, 59 anos</div></div>
+          <div class="faction-meta-item"><div class="faction-meta-label">Operações</div><div class="faction-meta-value">Distribuição de NULO, extorsão, armas</div></div>
+          <div class="faction-meta-item"><div class="faction-meta-label">Relação com Meridian</div><div class="faction-meta-value">Acordo de distribuição. Não sabe do LETHE.</div></div>
+        </div>
+        <p>Zhigarev é homem de negócios antes de ser criminoso. Faz o que é lucrativo. Se soubesse o que está distribuindo, renegociaria. Não por princípio, por precaução — ser cúmplice de envenenamento em massa é risco que não consta no contrato original. Se os protagonistas trouxerem evidências sobre a composição real de NULO, ele pode virar contra o Meridian. Por autopreservação.</p>
+      </div>
+    </div>
+
+    <div class="faction-block">
+      <div class="faction-header">
+        <div class="faction-name">TONG DO DRAGÃO VERMELHO</div>
+        <div class="faction-tag">Tríade Chinesa / Neutro-Independente</div>
+      </div>
+      <div class="faction-body">
+        <div class="faction-meta">
+          <div class="faction-meta-item"><div class="faction-meta-label">Base</div><div class="faction-meta-value">Chinatown / Hell's Kitchen</div></div>
+          <div class="faction-meta-item"><div class="faction-meta-label">Líder</div><div class="faction-meta-value">Yue "Dragão-de-Ferro" Bai, 51 anos</div></div>
+          <div class="faction-meta-item"><div class="faction-meta-label">Operações</div><div class="faction-meta-value">Apostas, extorsão, contrabando de armas</div></div>
+          <div class="faction-meta-item"><div class="faction-meta-label">Relação com Meridian</div><div class="faction-meta-value">Hostil ativa. Dois atentados em 97-98.</div></div>
+        </div>
+        <p>Independência é a coisa mais cara em Nova Iorque. Yue Bai pagou por ela e continua pagando. Tem redes que cruzam a cidade sem passar pelos canais habituais, tem rancor específico contra o Meridian, e tem um código interno rígido que a torna previsível — o que é vantagem para quem quer negociar. Qualquer negócio com ela tem preço alto e prazo de pagamento curto. Mas ela cumpre o que promete.</p>
+      </div>
+    </div>
+
+    <div class="faction-block">
+      <div class="faction-header">
+        <div class="faction-name">LOS MUERTOS VIVOS</div>
+        <div class="faction-tag">Crime de Rua / Aliado Potencial</div>
+      </div>
+      <div class="faction-body">
+        <div class="faction-meta">
+          <div class="faction-meta-item"><div class="faction-meta-label">Base</div><div class="faction-meta-value">Washington Heights / South Bronx</div></div>
+          <div class="faction-meta-item"><div class="faction-meta-label">Líder</div><div class="faction-meta-value">Miguel "Santo" Santiago, 38 anos</div></div>
+          <div class="faction-meta-item"><div class="faction-meta-label">Composição</div><div class="faction-meta-value">~80 membros, maioria dominicana</div></div>
+          <div class="faction-meta-item"><div class="faction-meta-label">Problema com NULO</div><div class="faction-meta-value">Três mortes. Estão procurando respostas.</div></div>
+        </div>
+        <p>Não são simpáticos no modo convencional. Têm sangue nas mãos e território mantido pela violência. Mas São um dos poucos grupos na cidade que perceberam que NULO é diferente. Santiago entende que o produto está destruindo sua comunidade de um jeito diferente, mais quieto. Isso o irrita mais do que qualquer concorrente.</p>
+      </div>
+    </div>
+
+    <div class="faction-block">
+      <div class="faction-header">
+        <div class="faction-name">OS ALBANESES — A MATILHA</div>
+        <div class="faction-tag">Crime Organizado / Antagonista Secundário</div>
+      </div>
+      <div class="faction-body">
+        <div class="faction-meta">
+          <div class="faction-meta-item"><div class="faction-meta-label">Base</div><div class="faction-meta-value">Astoria, Queens / partes do Bronx</div></div>
+          <div class="faction-meta-item"><div class="faction-meta-label">Líder</div><div class="faction-meta-value">Agron Krasniqi, 35 anos</div></div>
+          <div class="faction-meta-item"><div class="faction-meta-label">Especialidade</div><div class="faction-meta-value">Músculo-para-aluguel. Trabalhos sujos.</div></div>
+          <div class="faction-meta-item"><div class="faction-meta-label">Cliente</div><div class="faction-meta-value">Meridian, via intermediário. Não sabem o cliente final.</div></div>
+        </div>
+        <p>22 homens, todos ex-combatentes dos Bálcãs. O Meridian usa os Albaneses para trabalhos que não podem ser atribuídos aos Auditores: intimidação, destruição de evidências, eliminar problemas que precisam parecer acidentes. <strong>Krasniqi</strong> não faz perguntas sobre o cliente final porque o dinheiro é suficiente para não precisar.</p>
+      </div>
+    </div>
+
+    <div class="doc-footer">
+      <span>MOROZ — A CIDADE QUE APODRECEU POR DENTRO</span>
+      <span>SEÇÃO 05 / 10</span>
+    </div>
+  </section>
+
+  <!-- ===================== DROGAS ===================== -->
+  <section class="section" id="drogas">
+    <div class="section-header">
+      <div class="section-number">06</div>
+      <div>
+        <div class="section-title">DROGAS</div>
+        <div class="section-label">Compostos — Mercado — Consequências</div>
+      </div>
+    </div>
+
+    <p class="lead">A farmacologia desta Nova Iorque tem três camadas: o que circula na rua, o que circula nos laboratórios corporativos, e o que existe entre esses dois mundos sem nome definido.</p>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Nome</th>
+          <th>Composição Real</th>
+          <th>Efeito Declarado</th>
+          <th>Efeito Real</th>
+          <th>Origem</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>NULO</strong></td>
+          <td>Composto sintético + microdoses de LETHE</td>
+          <td>Sedativo leve, reduz ansiedade</td>
+          <td>Erosão de iniciativa emocional. Passividade progressiva. Sem dependência química clássica.</td>
+          <td>Laboratórios Meridian. Distribuição via Bratva.</td>
+          <td><span class="drug-tag red">LETHE</span></td>
+        </tr>
+        <tr>
+          <td><strong>VERSO</strong></td>
+          <td>Variante de LETHE + eufórico sintético</td>
+          <td>Euforia, desinibição, clareza mental</td>
+          <td>Efeitos similares ao NULO, mais lentos. Formulação premium para classe alta.</td>
+          <td>Meridian. Distribuição via rede social.</td>
+          <td><span class="drug-tag violet">LETHE Premium</span></td>
+        </tr>
+        <tr>
+          <td><strong>RED</strong></td>
+          <td>Estimulante sintético puro</td>
+          <td>Uso interno do Meridian</td>
+          <td>Performance de combate por 4-6h. Crash severo. Uso prolongado: danos neurológicos. Os Auditores tomam antes de operações.</td>
+          <td>Meridian — exclusivo Auditores.</td>
+          <td><span class="drug-tag acid">Corporativo</span></td>
+        </tr>
+        <tr>
+          <td><strong>SUPLEMENTOS</strong></td>
+          <td>Vitaminas + microdoses de LETHE</td>
+          <td>Suplemento alimentar, vitaminas B e C</td>
+          <td>Distribuídos pela Igreja do Voluntário. Efeito acumulativo ao longo de semanas. Usuários não percebem — a mudança é gradual.</td>
+          <td>Fornecedor terceirizado com certificação federal falsificada.</td>
+          <td><span class="drug-tag red">LETHE — Massa</span></td>
+        </tr>
+        <tr>
+          <td><strong>Crack / Heroína</strong></td>
+          <td>Produtos tradicionais, sem alteração</td>
+          <td>Mercado convencional</td>
+          <td>O mercado tradicional continua. NULO é concorrência desleal porque é mais barato e não tem abstinência visível.</td>
+          <td>Múltiplas origens. Famílias italianas, Los Muertos, outros.</td>
+          <td><span class="drug-tag cream">Mercado</span></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>Cronologia de LETHE no Corpo</h2>
+    <p><strong>Semanas 1-4:</strong> nenhum efeito perceptível. <strong>Semanas 4-8:</strong> o usuário dorme melhor. Menos pesadelos. Parece resultado positivo. <strong>Mês 3:</strong> respostas emocionais a conflitos chegam ligeiramente atrasadas. Difícil notar. <strong>Mês 6:</strong> o usuário percebe que não brigou com o chefe quando deveria. Não sente que perdeu algo — só que não valeu o esforço. <strong>Mês 12:</strong> uma raiva que antes durava dias dura horas. Uma determinação que antes movia ações some antes de virar ato.</p>
+    <p>Retirada do composto: recuperação parcial em três a seis semanas. Recuperação total: desconhecida. A Dra. Marsh tem hipóteses. Nenhuma é boa.</p>
+
+    <div class="callout">
+      <strong>Para o Mestre:</strong> Jogadores que quiserem representar personagens de bairros afetados podem usar isso como traço de background. Não precisa ser debilitante, só presente — a consciência de que algo foi tirado, sem saber o nome do que foi.
+    </div>
+
+    <div class="doc-footer">
+      <span>MOROZ — A CIDADE QUE APODRECEU POR DENTRO</span>
+      <span>SEÇÃO 06 / 10</span>
+    </div>
+  </section>
+
+  <!-- ===================== A CIDADE ===================== -->
+  <section class="section" id="cidade">
+    <div class="section-header">
+      <div class="section-number">07</div>
+      <div>
+        <div class="section-title">A CIDADE</div>
+        <div class="section-label">Bairros — Território — Atmosfera</div>
+      </div>
+    </div>
+
+    <p class="lead">Nova Iorque tem a mesma geografia de sempre. O que mudou é quem a controla e o que o controle significa.</p>
+
+    <div class="neighborhood-grid">
+
+      <div class="neighborhood-card">
+        <div class="neighborhood-name">SOUTH BRONX</div>
+        <div class="neighborhood-control">Los Muertos / Bairro-Teste de LETHE</div>
+        <div class="neighborhood-desc">Quatro décadas de desinvestimento. Edifícios meio demolidos ao lado de outros com moradores. Temperatura abaixo de zero em janeiro. A Igreja tem cinco centros aqui. NULO circula sem interferência desde 1997. Os que ficaram, ficaram por falta de opção ou amor ao lugar. Às vezes os dois.</div>
+      </div>
+
+      <div class="neighborhood-card">
+        <div class="neighborhood-name">HARLEM</div>
+        <div class="neighborhood-control">Disputado — Los Muertos / Família Marotti</div>
+        <div class="neighborhood-desc">Tensão de território. Os Marotti perderam força mas ainda têm lavanderias, restaurantes e dois policiais comprados no 28º Distrito. Los Muertos avançam do norte. É onde padrões começam a aparecer para quem olha com atenção.</div>
+      </div>
+
+      <div class="neighborhood-card">
+        <div class="neighborhood-name">CHINATOWN</div>
+        <div class="neighborhood-control">Controle: Tong do Dragão Vermelho</div>
+        <div class="neighborhood-desc">Yue Bai mantém o bairro com mão firme. Baixa taxa de crime visível, negócios funcionando, e atividade ilegal invisível. A polícia não entra sem motivo. Os que entraram sem motivo em 1996 saíram em maca.</div>
+      </div>
+
+      <div class="neighborhood-card">
+        <div class="neighborhood-name">HELL'S KITCHEN</div>
+        <div class="neighborhood-control">Disputado — Tríade vs. Albaneses</div>
+        <div class="neighborhood-desc">O bairro que estava deixando de ser perigoso voltou a ser. Os Albaneses de Krasniqi expandiram para cá em 1998 e encontraram resistência do Tong. Zona de conflito ativa. Todo bar no bloco das Avenidas 9 e 10 tem algo embaixo do balcão.</div>
+      </div>
+
+      <div class="neighborhood-card">
+        <div class="neighborhood-name">MIDTOWN</div>
+        <div class="neighborhood-control">Meridian Group / NYPD Oficial</div>
+        <div class="neighborhood-desc">O andar de cima da cidade. 1 Meridian Plaza: 32 andares de vidro escuro na Sixth Avenue. Câmeras em cada esquina num raio de 4 quarteirões. A divisão de Auditores tem escritório no 18º andar. O 19º não aparece no diretório.</div>
+      </div>
+
+      <div class="neighborhood-card">
+        <div class="neighborhood-name">LOWER EAST SIDE</div>
+        <div class="neighborhood-control">Descentralizado — Hackers, Subcultura, Grupo Rastreamento</div>
+        <div class="neighborhood-desc">Onde a cidade ainda tem pulso próprio. Bares até as quatro da manhã. Artistas ao lado de traficantes ao lado de técnicos de computador que não dormem. O lugar mais difícil de vigiar porque a vigia parece natural.</div>
+      </div>
+
+      <div class="neighborhood-card">
+        <div class="neighborhood-name">BROOKLYN — RED HOOK</div>
+        <div class="neighborhood-control">Bratva / Base do Grupo Rastreamento</div>
+        <div class="neighborhood-desc">Porto, armazéns, cheiro de óleo e maresia. A Organizatsiya de Zhigarev controla as docas. Ariadne escolheu o único armazém que a Bratva não usa para base do Grupo. Isso ou é muito inteligente ou é um problema esperando acontecer.</div>
+      </div>
+
+      <div class="neighborhood-card">
+        <div class="neighborhood-name">HOWARD BEACH / QUEENS</div>
+        <div class="neighborhood-control">Família Calabrese / zona italiana</div>
+        <div class="neighborhood-desc">Restaurantes com menu em italiano, padarias que abrem às cinco da manhã, e a casa de <strong>Enzo "Mãos-Frias" Calabrese</strong> numa rua residencial com quatro carros parados na frente. Território que tem décadas. Vai durar décadas mais, a menos que algo mude.</div>
+      </div>
+
+      <div class="neighborhood-card">
+        <div class="neighborhood-name">BRIGHTON BEACH</div>
+        <div class="neighborhood-control">Organizatsiya de Brighton Beach</div>
+        <div class="neighborhood-desc">Placas em cirílico, restaurantes com vodka de qualidade, velhos em bancos de parque que não perdem nada. <strong>Pavel "O Contador" Zhigarev</strong> mora numa casa de três andares a duas quadras da praia. Dois seguranças na calçada. Quatro dentro. Não por medo — por dinheiro para pagar.</div>
+      </div>
+
+      <div class="neighborhood-card">
+        <div class="neighborhood-name">UPPER EAST SIDE</div>
+        <div class="neighborhood-control">Político / VERSO circula aqui</div>
+        <div class="neighborhood-desc">O único bairro que parece funcionar. Restaurantes limpos, parques varridos. VERSO circula em festas privadas. Os usuários são advogados, corretores, jornalistas. Nenhum se reconheceria como viciado porque VERSO não cria dependência. Só modifica.</div>
+      </div>
+
+      <div class="neighborhood-card">
+        <div class="neighborhood-name">WASHINGTON HEIGHTS</div>
+        <div class="neighborhood-control">Los Muertos Vivos</div>
+        <div class="neighborhood-desc">Território consolidado de Santiago. Alta concentração de imigrantes dominicanos. A polícia aparece quando chamada. NULO tentou entrar aqui em 1998. Três distribuidores morreram. O mercado não voltou.</div>
+      </div>
+
+    </div>
+
+    <div class="doc-footer">
+      <span>MOROZ — A CIDADE QUE APODRECEU POR DENTRO</span>
+      <span>SEÇÃO 07 / 10</span>
+    </div>
+  </section>
+
+  <!-- ===================== ARCO ===================== -->
+  <section class="section" id="arco">
+    <div class="section-header">
+      <div class="section-number">08</div>
+      <div>
+        <div class="section-title">O ARCO</div>
+        <div class="section-label">Prólogo — Ato I — Ato II — Ato III</div>
+      </div>
+    </div>
+
+    <p class="lead">Quatro movimentos. Um prólogo onde eles caem. Três atos onde eles sobem — ou tentam. Não há garantia de final feliz. Há possibilidade de final honesto.</p>
+
+    <div class="act-block">
+      <div class="act-header">
+        <div class="act-number">00</div>
+        <div>
+          <div class="act-title">PRÓLOGO — A QUEDA</div>
+          <div class="act-label">Outubro–Dezembro 1999 · Como tudo começa</div>
+        </div>
+      </div>
+      <div class="act-body">
+        <p>Cada jogador vem de um departamento diferente. Nenhum se conhece. Cada um recebe, pelos canais habituais, uma ordem de comparecimento para verificação de denúncia: 1847 Webster Avenue, Bronx, 14h30. Motivo declarado: suspeita de laboratório de entorpecentes, andar quatro.</p>
+        <p>Encontram-se no corredor. Hector Ruiz está morto quando chegam. O apartamento foi limpo. Mas atrás do espelho há evidências que ninguém esperava. Vinte e dois minutos depois, três homens de terno entram — Auditores do Meridian, dopados com RED. O apartamento tem quatro por três metros. A conversa dura dez segundos antes de alguém sacar.</p>
+        <p>Resultado: um Auditor morto, dois fugidos, os protagonistas com evidências comprometedoras e um apartamento com sangue de contratado privado na parede. Ainda naquela noite, <strong>Marcus Breel</strong> já está no trabalho — evidências plantadas, o delator <strong>Jorge Mena</strong> silenciado antes do amanhecer. Em quarenta e oito horas, os protagonistas estão suspensos. Nunca tiveram tempo de se organizar. Nunca houve grupo, missão, aliado de farda. Só cinco pessoas de departamentos diferentes que estavam no lugar errado na hora certa — e agora pagam por isso.</p>
+        <p>Transferidos para a SRD. O arquivo some. Estão no terceiro andar de um prédio em Midtown com uma cafeteira que ninguém limpou desde setembro. Ninguém acredita neles. Os colegas mudam de calçada. <strong>Ainda assim, eles têm o HD. As seringas. O bloco de notas com o nome de Helena Marsh.</strong></p>
+      </div>
+    </div>
+
+    <div class="act-block">
+      <div class="act-header">
+        <div class="act-number">I</div>
+        <div>
+          <div class="act-title">ATO I — DO ZERO</div>
+          <div class="act-label">Janeiro–Março 2000 · Trabalho sujo + primeiras conexões</div>
+        </div>
+      </div>
+      <div class="act-body">
+        <p>Eles estão na SRD. Fazem o trabalho sujo que Neihart manda — casos que ninguém quer tocar, operações em bairros hostis, cobertura para coisas que ninguém vai admitir depois. São tratados como instrumentos. Cada missão que cumprem aumenta a dívida que têm com o comandante corrupto que os usa. Abaixo de Neihart, o Tenente <strong>Kowalski</strong> vê tudo, finge não ver, e raramente diz algo útil. Mas às vezes diz.</p>
+        <p>Nas brechas desse trabalho, eles começam a puxar os fios que têm. O HD é aberto por alguém de fora do sistema — um hacker do Lower East Side que cobra em espécie e não faz perguntas. O que está dentro não é o que esperavam: correspondência interna do Meridian sobre o "Protocolo Outubro". Nomes. Coordenadas. Datas.</p>
+        <p>Os primeiros contatos surgem aqui — não como grupo organizado, mas como indivíduos que aparecem pelo caminho. <strong>Miguel Santiago</strong> manda recado via informante comum: sabe do que aconteceu no 1847 Webster porque um dos caras de terno era rosto conhecido da rua. Uma jornalista aparece com perguntas sobre os desaparecimentos do Bronx que ninguém está fazendo. Um médico que perdeu o registro depois de reportar sintomas que não fazia sentido no prontuário. <strong>Ariadne</strong>, ex-FBI, contata através de intermediário que não pode ser coincidência — testa antes de mostrar o que tem. Não há aliança. Há pessoas que querem a mesma coisa por razões diferentes, e que podem ou não continuar querendo quando ficar perigoso de verdade.</p>
+        <p>O foco do Ato I é duplo: o trabalho sujo obrigatório que os mantém empregados e vivos dentro do sistema, e a investigação paralela que começa a mostrar os contornos da conspiração. No final do Ato I, eles têm o suficiente para saber que existe um padrão — mas não quem está no topo.</p>
+        <p><strong>Cena de fecho do Ato I:</strong> Neihart os manda numa operação que, descobrem na hora, era uma emboscada para eliminar uma testemunha que eles nem sabiam que era testemunha. Podem salvar a testemunha — mas isso os coloca diretamente contra Neihart. Ou podem executar a ordem e carregar isso.</p>
+      </div>
+    </div>
+
+    <div class="act-block">
+      <div class="act-header">
+        <div class="act-number">II</div>
+        <div>
+          <div class="act-title">ATO II — ATIÇAR O VESPEIRO</div>
+          <div class="act-label">Março–Julho 2000 · Descobertas e consequências</div>
+        </div>
+      </div>
+      <div class="act-body">
+        <p>Os protagonistas já têm contatos. Têm aliados incômodos — Ariadne, Santiago, possivelmente Yue Bai, possivelmente os De Filippo ou Marotti que têm razão para odiar os Calabrese e o Meridian. Têm o depoimento da Dra. Marsh, que eles conseguiram extrair de New Jersey com considerável perigo.</p>
+        <p>O Ato II é sobre desmontar um pilar da conspiração. O Mestre escolhe qual, ou deixa emergir do jogo: pode ser a rede de distribuição de NULO (expor e cortar o acordo Calabrese-Meridian), pode ser os centros da Igreja do Voluntário (revelar os suplementos, forçar o Rev. Ayre a escolher um lado), ou pode ser a corrupção policial (ter prova suficiente para colocar Breel ou oficiais corruptos sob pressão).</p>
+        <p>O que importa é que isso <strong>chama atenção</strong>. O Meridian percebe que os protagonistas não foram neutralizados. <strong>Mohr</strong> ativa os Albaneses. Neihart para de fingir que não sabe o que eles fazem e começa a cortar os recursos que tinham. Os aliados ficam com medo.</p>
+        <p><strong>Cena de fecho do Ato II:</strong> Alguém que eles construíram como aliado durante o Ato I morre — ou se vende. O que muda para eles não é só o número de aliados. É a certeza de que estão realmente sozinhos, e que quem os colocou na SRD sabia o que estava fazendo.</p>
+      </div>
+    </div>
+
+    <div class="act-block">
+      <div class="act-header">
+        <div class="act-number">III</div>
+        <div>
+          <div class="act-title">ATO III — O CORAÇÃO DA CIDADE</div>
+          <div class="act-label">Verão 2000 · Caçados, sem saída, dentro da boca do lobo</div>
+        </div>
+      </div>
+      <div class="act-body">
+        <p>Eles estão caçados. A SRD os demitiu formalmente ou vai demitir. Mohr colocou preço na cabeça deles com os Albaneses. Neihart quer eles presos — ou simplesmente sumiços. Os aliados que sobraram estão agachados. A cidade que jurou servir os quer mortos ou calados.</p>
+        <p>E eles têm, pela primeira vez, o nome de Elias Holt. Sabem o que o Projeto LETHE fez — e continua fazendo. Têm evidências suficientes para que, em mãos certas, destruam tudo. O problema é que não há mãos certas. A mídia é parcialmente controlada. As agências federais têm membros dos Jardineiros. A Prefeitura está no bolso do Meridian.</p>
+        <p>O Ato III é sobre como eles chegam ao coração de Nova Iorque com a intenção de revelar ou derrubar a liderança da conspiração — sabendo que isso pode custar a vida deles. Não como heróis. Como pessoas que não têm mais nada a perder e uma única coisa que ainda importa: fazer o que fazem por algo que valha.</p>
+        <p>O confronto final com Holt não é uma batalha no sentido convencional. Holt não saca. Não foge. Ele <em>argumenta</em>. Ele tem dados. Ele acredita no que fez. A questão mais difícil do Ato III não é como derrotá-lo fisicamente. É o que fazer com um homem que fez uma coisa horrível pelo que acredita ser o bem genuíno — e que não vai mudar de ideia.</p>
+        <p><strong>Não há final dado. Há decisão.</strong> Revelar tudo e viver com as consequências. Destruir a operação sem revelar — eficaz, mas anônimo. Ou algo mais permanente, com tudo que isso carrega. O que fazem diz quem são agora — não quem eram em outubro de 1999.</p>
+      </div>
+    </div>
+
+    <div class="doc-footer">
+      <span>MOROZ — A CIDADE QUE APODRECEU POR DENTRO</span>
+      <span>SEÇÃO 08 / 10</span>
+    </div>
+  </section>
+
+  <!-- ===================== DEPARTAMENTOS ===================== -->
+  <section class="section" id="departamentos">
+    <div class="section-header">
+      <div class="section-number">09</div>
+      <div>
+        <div class="section-title">DEPARTAMENTOS</div>
+        <div class="section-label">Cinco Origens — Cinco Perspectivas</div>
+      </div>
+    </div>
+
+    <p class="lead">Cada jogador escolhe o departamento de onde seu personagem vem. Isso não define quem ele é — define o que ele sabe, quem ele conhece, e como vê a cidade. O mestre pode limitar os departamentos disponíveis dependendo do número de jogadores.</p>
+
+    <div class="callout">
+      <strong>Nota:</strong> Os departamentos abaixo são pontos de partida, não moldes. Os jogadores fazem o personagem ser deles. O que os une na cena de abertura é um único endereço: 1847 Webster Avenue, Bronx, 14h30, terça-feira, 19 de outubro de 1999.
+    </div>
+
+    <div class="archetype-block">
+      <div class="archetype-header">
+        <div class="archetype-title">HOMICÍDIOS</div>
+        <div class="archetype-dept">44º Distrito — South Bronx</div>
+      </div>
+      <div class="archetype-body">
+        <p>O 44º fica no coração do South Bronx, Grand Concourse. Distrito com mais homicídios por habitante de Nova Iorque por quatro anos consecutivos. Um detetive de homicídios aqui conhece o bairro de um jeito específico: pelos mortos. Sabe onde as famílias moram, quem tem pendência com quem, os nomes que aparecem em relatórios com dez anos de distância.</p>
+        <p><strong>O que traz para o grupo:</strong> Leitura de cenas de crime, interrogatório, conexão de padrões entre casos não relacionados, rede de contatos em múltiplos distritos, acesso a arquivos de mortes não resolvidas.</p>
+        <p><strong>Ponto de entrada na conspiração:</strong> Conhece pelo menos dois dos nomes riscados no bloco de notas. Os casos foram arquivados como overdose. Nunca pareceu certo.</p>
+      </div>
+    </div>
+
+    <div class="archetype-block">
+      <div class="archetype-header">
+        <div class="archetype-title">VICE</div>
+        <div class="archetype-dept">Setor Norte de Manhattan — Harlem e Washington Heights</div>
+      </div>
+      <div class="archetype-body">
+        <p>A divisão de Vice cobre o que a lei proíbe e o mercado não para de oferecer. Trabalha com disfarce, informantes, acordos que ficam fora dos relatórios formais. Conhece a cidade pela lateral — pelos bares às três da manhã, pelos pontos de distribuição. O fluxo de NULO chegou aqui em 1997. Quem trabalha aqui o suficiente percebe que o produto tem algo diferente.</p>
+        <p><strong>O que traz para o grupo:</strong> Rede de informantes, trabalho encoberto, conhecimento do mercado de drogas, contatos em ambos os lados da lei, experiência em infiltração.</p>
+        <p><strong>Ponto de entrada na conspiração:</strong> Tem um informante que desapareceu em 1998. Era usuário de NULO. Nunca havia sido instável antes de começar a usar.</p>
+      </div>
+    </div>
+
+    <div class="archetype-block">
+      <div class="archetype-header">
+        <div class="archetype-title">UNIDADE DE SERVIÇO DE EMERGÊNCIA</div>
+        <div class="archetype-dept">Manhattan — Cobertura Ampla / Operações Táticas</div>
+      </div>
+      <div class="archetype-body">
+        <p>A USE é o que a NYPD aciona quando a situação saiu do controle convencional. Reféns, intervenções armadas, resgate em ambientes hostis, operações táticas. Acostumado a entrar em lugares que outros policiais não entram. Um policial da USE designado para verificação de denúncia rotineira no Bronx levanta a sobrancelha.</p>
+        <p><strong>O que traz para o grupo:</strong> Combate próximo e à distância, planejamento tático, resistência física, acesso a equipamento especializado, operações noturnas, experiência em situações de alto risco.</p>
+        <p><strong>Ponto de entrada na conspiração:</strong> Participou de uma operação em 1998 que foi abortada sem explicação no último minuto. O alvo era uma instalação em New Jersey que — ele percebe agora — pode ser o laboratório do Meridian.</p>
+      </div>
+    </div>
+
+    <div class="archetype-block">
+      <div class="archetype-header">
+        <div class="archetype-title">CRIME ORGANIZADO</div>
+        <div class="archetype-dept">Unidade de Investigação — Manhattan Sul</div>
+      </div>
+      <div class="archetype-body">
+        <p>A unidade que investiga famílias, tongs, organizações. Conhece as estruturas de poder do crime organizado melhor do que a maioria dos criminosos conhece a si mesmos. Sabe quem manda em quem, quem deve a quem, onde estão as rachaduras. Trabalha em prazos de anos, não de dias. Três anos de montar um caso e vê-lo ser arquivado por interferência política faz coisas específicas com um investigador.</p>
+        <p><strong>O que traz para o grupo:</strong> Conhecimento profundo das facções, acesso a dossiês sobre crime organizado, capacidade de navegar entre gangues, entendimento de hierarquia e poder.</p>
+        <p><strong>Ponto de entrada na conspiração:</strong> Estava montando um caso contra os Calabrese quando o caso foi subitamente arquivado. O nome que aparecia nos documentos internos — removido antes do arquivamento — era Meridian.</p>
+      </div>
+    </div>
+
+    <div class="archetype-block">
+      <div class="archetype-header">
+        <div class="archetype-title">ASSUNTOS INTERNOS</div>
+        <div class="archetype-dept">NYPD — Divisão de Integridade</div>
+      </div>
+      <div class="archetype-body">
+        <p>O departamento mais odiado dentro da própria instituição. Investigam policiais corruptos — o que significa que todo colega potencialmente os odeia ou os teme. Vivem num isolamento específico. Veem a corrupção como paisagem, não como exceção. Quando percebem que o que encontraram em 1847 Webster Avenue aponta para dentro da própria NYPD, não ficam surpresos — ficam com medo de quantos níveis sobe.</p>
+        <p><strong>O que traz para o grupo:</strong> Conhecimento de procedimentos internos, acesso a dossiês de IA sobre policiais corruptos, entendimento de como a corrupção funciona institucionalmente, capacidade de identificar quem está comprado.</p>
+        <p><strong>Ponto de entrada na conspiração:</strong> Estava investigando o Tenente Breel por irregularidades menores quando a investigação foi travada por cima. O travamento veio diretamente do escritório de Dusk.</p>
+      </div>
+    </div>
+
+    <div class="doc-footer">
+      <span>MOROZ — A CIDADE QUE APODRECEU POR DENTRO</span>
+      <span>SEÇÃO 09 / 10</span>
+    </div>
+  </section>
+
+  <!-- ===================== O COMEÇO ===================== -->
+  <section class="section" id="inicio">
+    <div class="section-header">
+      <div class="section-number">10</div>
+      <div>
+        <div class="section-title">O COMEÇO</div>
+        <div class="section-label">Cena de Abertura — Outubro de 1999</div>
+      </div>
+    </div>
+
+    <p class="lead">A campanha não começa na SRD. Começa antes da queda. Começa com policiais que não se conhecem, num endereço do Bronx, com uma ordem de serviço que ninguém levou a sério o suficiente para explicar direito.</p>
+
+    <div class="mission-block">
+      <div class="mission-title">VERIFICAÇÃO DE DENÚNCIA — 1847 WEBSTER AVENUE</div>
+
+      <h3>A Ordem</h3>
+      <p>Terça-feira, 19 de outubro de 1999. Cada policial recebe, pelo canal habitual, uma ordem de comparecimento. Endereço: 1847 Webster Avenue, Bronx, andar quatro. Motivo declarado: suspeita de laboratório de entorpecentes. Suspeito de referência: Hector Ruiz, 31 anos. A ordem vem assinada por um capitão que nenhum deles conhece pessoalmente. Não há instruções adicionais. Não há reunião prévia.</p>
+      <p>Cada um chega sem saber quem são os outros. Encontram-se no corredor do quarto andar.</p>
+
+      <h3>O Que Encontram</h3>
+      <p>Hector Ruiz está morto quando chegam. Deitado no colchão, agulha no braço, expressão tranquila, sem sinais de luta. O apartamento foi limpo nas últimas duas a quatro horas — sem produto, sem equipamento. Quem limpou foi cuidadoso. Não cuidadoso o suficiente.</p>
+      <p>Atrás do espelho do banheiro, um painel de madeira que soa oco. Dentro: um HD externo com bloqueio de senha, uma sacola com seis seringas preenchidas com líquido transparente sem etiqueta, e um bloco de notas espiral com catorze nomes manuscritos. Onze têm risco vermelho ao lado. Um nome sem risco: <strong>Dra. Helena Marsh, Meridian Pharma.</strong></p>
+
+      <h3>A Complicação</h3>
+      <p>Vinte e dois minutos depois que chegam, três homens entram pelo corredor. Ternos escuros, comunicadores de ouvido, equipamento que não é padrão policial — são Auditores do Meridian, dopados com RED. Param quando veem os policiais. A conversa dura menos de dez segundos antes de alguém sacar.</p>
+      <p>O apartamento tem quatro por três metros. Há móveis. Há paredes. Não há espaço para elegância. Os Auditores tomaram RED. Os policiais não tomaram nada.</p>
+
+      <h3>Depois</h3>
+      <p>Um dos Auditores está morto. Os outros dois fugiram. Os policiais têm o HD, as seringas e o bloco de notas. E têm um apartamento com um cadáver e sangue de contratado privado na parede.</p>
+      <p>Ainda naquela noite, alguém já está trabalhando do outro lado. Evidências aparecem onde não deveriam. O boletim é alterado. Em quarenta e oito horas, cada um deles é contactado — não pelo Capitão Carver, mas pela corregedoria. Breel fez seu trabalho rápido. O arquivo some. Não há grupo, não há missão, não há estrutura. Só cinco pessoas de departamentos diferentes que de repente compartilham o mesmo problema: sabem algo que devia tê-los matado, e ainda estão vivos sem saber por quanto tempo.</p>
+      <p>Transferidos para a SRD. A cidade continua funcionando.</p>
+    </div>
+
+    <h2>Pistas da Cena de Abertura</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Pista</th>
+          <th>Leva a</th>
+          <th>Perigo Envolvido</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>HD externo bloqueado</strong></td>
+          <td>Arquivos internos do Meridian sobre Protocolo Outubro. Precisam de alguém de fora do sistema.</td>
+          <td>O Meridian rastreia tentativas de acesso. Têm 48h após abertura.</td>
+        </tr>
+        <tr>
+          <td><strong>As seringas</strong></td>
+          <td>Análise revela LETHE. O laboratório precisa ser independente.</td>
+          <td>Qualquer laboratório municipal vai reportar para Dusk.</td>
+        </tr>
+        <tr>
+          <td><strong>Dra. Helena Marsh</strong></td>
+          <td>Criadora do LETHE. Está com medo. Pode revelar o funcionamento.</td>
+          <td>O Meridian tem olhos sobre ela. Contato gera resposta em horas.</td>
+        </tr>
+        <tr>
+          <td><strong>Nomes riscados</strong></td>
+          <td>Onze pessoas que sabiam algo. Dez mortas ou desaparecidas. Uma viva.</td>
+          <td>Encontrá-la antes do Meridian é uma corrida com tempo indefinido.</td>
+        </tr>
+        <tr>
+          <td><strong>Os Auditores</strong></td>
+          <td>Identificar o morto leva ao Meridian. Os outros dois ainda estão na cidade.</td>
+          <td>Identificar o morto toca investigação que será enterrada rapidamente.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="doc-footer">
+      <span>MOROZ — A CIDADE QUE APODRECEU POR DENTRO</span>
+      <span>SEÇÃO 10 / 10 — FIM DO DOSSIÊ</span>
+    </div>
+  </section>
+
+</div><!-- end main -->
+
+<script>
+  function enterDossier() {
+    document.getElementById('cover').style.display = 'none';
+    const main = document.getElementById('main');
+    main.classList.add('visible');
+    showSection('mundo', document.querySelector('.nav-btn'));
+  }
+
+  function showSection(id, btn) {
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    const el = document.getElementById(id);
+    if (el) {
+      el.classList.add('active');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    if (btn) btn.classList.add('active');
+  }
+</script>
+</body>
+</html>
